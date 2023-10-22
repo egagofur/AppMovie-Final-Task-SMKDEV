@@ -1,23 +1,41 @@
 'use client';
 
 import { AspectRatio } from '@/components/atoms/aspect-ratio/aspect-ratio';
-import { Skeleton } from '@/components/atoms/skeleton/skeleton';
+import MovieCard from '@/components/atoms/card/MovieCard';
+import NotFound from '@/components/atoms/not-found/NotFound';
+import ButtonPagination from '@/components/molecules/button-pagination/ButtonPagination';
 import Layout from '@/components/templates/layout';
+import useMovieStore from '@/store/movieData';
 import { movieServices } from '@/utils/Services/movie.services';
+import configs from '@/utils/configs';
 import useIsMobile from '@/utils/hooks/useIsMobile';
+import { categoryMovie, responsive } from '@/utils/utils';
 import { useQuery } from '@tanstack/react-query';
 import Image from 'next/image';
-import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import AliceCarousel from 'react-alice-carousel';
 import 'react-alice-carousel/lib/alice-carousel.css';
+import Skeleton from 'react-loading-skeleton';
 
 export default function Home() {
   const isMobile = useIsMobile();
+  const [category, setCategory] = useState(null);
+  const [page, setPage] = useState(1);
 
-  const { data: movieData, isLoading: isLoadingMovie } = useQuery({
-    queryKey: ['movieData'],
+  const { movie, setMovie } = useMovieStore((state) => ({
+    movie: state.movie,
+    setMovie: state.setMovie,
+  }));
+
+  const {
+    data: movieData,
+    isLoading: isLoadingMovie,
+    isFetching,
+    refetch,
+  } = useQuery({
+    queryKey: ['movieData', page],
     queryFn: () => {
-      return movieServices?.getDataMovie();
+      return movieServices?.getDataMovies({ page, genre: category });
     },
     refetchOnWindowFocus: false,
   });
@@ -25,103 +43,115 @@ export default function Home() {
   const { data: genreMovieData } = useQuery({
     queryKey: ['genreMovieData'],
     queryFn: () => {
-      return movieServices?.getGenreMovie();
+      return movieServices?.getGenreMovies();
     },
     refetchOnWindowFocus: false,
   });
 
-  const responsive = {
-    0: { items: 1 },
-    568: { items: 2 },
-    1024: { items: 3 },
-  };
-
-  const items = movieData?.results?.map((item, index) => {
+  const items = movie?.results?.slice(0, 4)?.map((item, index) => {
     return (
       <div key={index} className='px-2'>
-        <AspectRatio ratio={16 / 9} suppressHydrationWarning>
+        <AspectRatio ratio={16 / 9}>
           <Image
-            src={'https://image.tmdb.org/t/p/original' + item.poster_path}
-            alt='test'
-            className='rounded-xl object-cover'
+            src={configs.IMAGE_URL + item.poster_path}
             fill
+            blurDataURL={configs.IMAGE_URL + item.poster_path}
+            alt='blur'
+            className={
+              'duration-[2s] animate-pulse rounded-xl bg-muted object-cover object-center'
+            }
+            onLoadingComplete={(image) =>
+              image.classList.remove('animate-pulse')
+            }
+            placeholder='blur'
           />
         </AspectRatio>
       </div>
     );
   });
 
+  const prevPage = () => {
+    if (page === 1) return;
+    setPage((prev) => prev - 1);
+  };
+
+  const handlePage = (page) => {
+    setPage(page);
+  };
+  const nextPage = () => {
+    if (page === 6) return;
+    setPage((prev) => prev + 1);
+  };
+
+  const handleClickCategory = (category) => {
+    setCategory(category);
+  };
+
+  useEffect(() => {
+    if (movieData) setMovie(movieData);
+  }, [movieData, setMovie]);
+
+  useEffect(() => {
+    refetch();
+  }, [page, category]);
+
   return (
     <Layout>
       <div className='container min-h-screen'>
-        <AliceCarousel
-          mouseTracking
-          items={items}
-          responsive={responsive}
-          autoPlay
-          disableButtonsControls
-          infinite
-          disableDotsControls={isMobile}
-          animationDuration={800}
-          innerWidth={isMobile ? 300 : 600}
-          animationEasingFunction='ease-in-out'
-          controlsStrategy='alternate'
-        />
+        {isLoadingMovie && isFetching ? (
+          <Skeleton count={4} />
+        ) : (
+          <AliceCarousel
+            items={items}
+            responsive={responsive}
+            autoPlay
+            disableButtonsControls
+            disableDotsControls={isMobile}
+            infinite
+            animationDuration={900}
+            swipeDelta={isMobile ? 50 : 100}
+            innerWidth={isMobile ? 300 : 600}
+            animationEasingFunction='ease-in-out'
+            controlsStrategy='alternate'
+            suppressHydrationWarning
+          />
+        )}
         <h1 className='py-4 text-2xl font-bold text-gray-400'>
           Browse by category
         </h1>
-        <div className='flex gap-4'>
-          <button className='rounded-full bg-figmaColor-secondary px-9 py-2 font-bold text-white'>
-            All
-          </button>
-          <button className='rounded-full bg-figmaColor-secondary px-9 py-2 font-bold text-white'>
-            All
-          </button>
-          <button className='rounded-full bg-figmaColor-secondary px-9 py-2 font-bold text-white'>
-            All
-          </button>
-          <button className='rounded-full bg-figmaColor-secondary px-9 py-2 font-bold text-white'>
-            All
-          </button>
+        <div className='flex flex-wrap gap-2 lg:gap-4'>
+          {categoryMovie?.map((item, index) => (
+            <button
+              key={index}
+              onClick={() => handleClickCategory(item.key)}
+              className={`rounded-full bg-figmaColor-secondary px-4 py-1 text-white lg:px-9 lg:py-2 lg:font-bold`}
+            >
+              {item.name}
+            </button>
+          ))}
         </div>
-        <div className='grid grid-cols-2 grid-rows-3 gap-x-4 gap-y-14 py-6 md:grid-cols-4 lg:grid-cols-5'>
-          {movieData?.results?.map((item, index) => {
-            return (
-              <Link href={`/movie/${item.id}`} key={index}>
-                <div className='max-w-max'>
-                  {isLoadingMovie ? (
-                    <Skeleton />
-                  ) : (
-                    <div>
-                      <Image
-                        src={
-                          'https://image.tmdb.org/t/p/original' +
-                          item.poster_path
-                        }
-                        alt='test'
-                        className='rounded-xl'
-                        width={400}
-                        height={400}
-                      />
-                    </div>
-                  )}
-                  <div className='py-4'>
-                    <h1 className='text-md line-clamp-1 font-bold'>
-                      {item.title}
-                    </h1>
-                    <p className='mt-2 w-max rounded-full bg-figmaColor-secondary px-4 py-1 text-center text-sm font-bold text-white'>
-                      {
-                        genreMovieData?.genres?.find(
-                          (genre) => genre.id === item.genre_ids[0]
-                        )?.name
-                      }
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
+        <div className='grid grid-cols-2 gap-x-4 gap-y-6 py-6 md:grid-cols-4 lg:grid-cols-5 lg:gap-x-0'>
+          {movie?.results?.length > 0 ? (
+            movie?.results?.map((item, index) => (
+              <MovieCard
+                key={index}
+                item={item}
+                isLoadingMovie={isLoadingMovie}
+                isFetching={isFetching}
+                genreMovieData={genreMovieData}
+              />
+            ))
+          ) : (
+            <NotFound />
+          )}
         </div>
+        <ButtonPagination
+          page={page}
+          handlePage={handlePage}
+          isMobile={isMobile}
+          nextPage={nextPage}
+          prevPage={prevPage}
+        />
       </div>
     </Layout>
   );

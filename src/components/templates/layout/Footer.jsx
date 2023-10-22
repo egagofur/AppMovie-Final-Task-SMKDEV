@@ -63,7 +63,7 @@ export default function Footer() {
           <div className='flex flex-col gap-y-4 lg:gap-y-9'>
             <div>
               <p className='text-xl font-bold'>Download</p>
-              <div className='flex gap-4'>
+              <div className='flex flex-col lg:flex-row lg:gap-4'>
                 <Link href='/'>
                   <ImageIconsCustom image={ImageGooglePlayIcons} />
                 </Link>
@@ -88,7 +88,7 @@ export default function Footer() {
             </div>
           </div>
         </div>
-        <Separator className='bg-white' />
+        <Separator className='mt-4 bg-white' />
         <div className='pt-6 text-center text-gray-300'>
           <p>Copyright © 2000-202 MilanTV. All Rights Reserved</p>
         </div>

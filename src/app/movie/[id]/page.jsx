@@ -1,13 +1,7 @@
-'use client';
-
-import { useParams } from 'next/navigation';
-import React from 'react';
+import MovieDetailSection from '@/components/organisms/sections/detail/MovieDetailSection';
 
 const DetailMovie = () => {
-  const params = useParams();
-  const detailData = params?.id;
-
-  return <div>DetailMovie: {detailData}</div>;
+  return <MovieDetailSection />;
 };
 
 export default DetailMovie;
