@@ -14,7 +14,7 @@ import { useQuery } from '@tanstack/react-query';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import AliceCarousel from 'react-alice-carousel';
-import 'react-alice-carousel/lib/alice-carousel.css';
+import 'react-alice-carousel/lib/scss/alice-carousel.scss';
 import Skeleton from 'react-loading-skeleton';
 
 export default function Home() {
