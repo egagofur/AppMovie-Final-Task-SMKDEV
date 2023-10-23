@@ -56,6 +56,7 @@ const MovieDetailSection = () => {
                     image.classList.remove('opacity-0');
                 }}
                 placeholder='blur'
+                loading='lazy'
               />
             </AspectRatio>
             <div className='absolute bottom-0 left-0 right-0 top-0 bg-black/60 text-white'>

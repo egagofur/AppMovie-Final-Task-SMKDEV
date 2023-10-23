@@ -27,6 +27,7 @@ const MovieCard = ({ item, isLoadingMovie, isFetching, genreMovieData }) => {
                 blurDataURL={configs.IMAGE_URL + item.poster_path}
                 alt='blur'
                 fill
+                loading='lazy'
                 className={
                   'duration-[2s] animate-pulse rounded-xl bg-muted object-cover'
                 }

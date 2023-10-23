@@ -53,6 +53,7 @@ export default function Home() {
       <div key={index} className='px-2'>
         <AspectRatio ratio={16 / 9}>
           <Image
+            loading='lazy'
             src={configs.IMAGE_URL + item.poster_path}
             fill
             blurDataURL={configs.IMAGE_URL + item.poster_path}
