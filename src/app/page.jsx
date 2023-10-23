@@ -1,7 +1,7 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { AspectRatio } from '@/components/atoms/aspect-ratio/aspect-ratio';
-import MovieCard from '@/components/atoms/card/MovieCard';
 import NotFound from '@/components/atoms/not-found/NotFound';
 import ButtonPagination from '@/components/molecules/button-pagination/ButtonPagination';
 import Layout from '@/components/templates/layout';
@@ -16,6 +16,9 @@ import { useEffect, useState } from 'react';
 import AliceCarousel from 'react-alice-carousel';
 import 'react-alice-carousel/lib/scss/alice-carousel.scss';
 import Skeleton from 'react-loading-skeleton';
+const MovieCard = dynamic(() => import('@/components/atoms/card/MovieCard'), {
+  ssr: false,
+});
 
 export default function Home() {
   const isMobile = useIsMobile();
